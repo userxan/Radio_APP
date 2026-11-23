@@ -32,7 +32,10 @@ A flagship **Dark Glassmorphic** radio app built with Flutter & Dart for rapid m
 3. **Add a New Client in 2 Minutes**:
    - Duplicate `lib/clients/eden_fm_config.dart` -> `lib/clients/new_client_config.dart`.
    - Create `lib/main_new_client.dart` calling `runWhiteLabelRadioApp(newClientConfig)`.
-   - Place their logo in `assets/clients/new_client/logo.png`.
-   - *(For App Store / Play Store builds)* Configure Android `productFlavors` and iOS schemes (or use `flutter_flavorizr`) so each client gets its own Bundle ID and App Icon.
+   - Place their logo in `assets/clients/eden_fm/logo.png` (1024x1024 PNG) and generate all Android & iOS app icons in one command:
+     ```bash
+     dart run flutter_launcher_icons
+     ```
+   - *(For App Store / Play Store builds)* Update `applicationId` in `android/app/build.gradle.kts` and `android:label` in `android/app/src/main/AndroidManifest.xml`.
 
 > **Android / iOS Background Audio Note**: When you run `flutter create .`, remember to add `WAKE_LOCK` and `FOREGROUND_SERVICE` permissions in `android/app/src/main/AndroidManifest.xml` (per `audio_service` setup) and enable **Audio, AirPlay, and Picture in Picture** under iOS **Background Modes** in Xcode.
