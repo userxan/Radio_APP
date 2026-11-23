@@ -56,6 +56,7 @@ class StationInfoScreen extends StatelessWidget {
             children: [
               ArtworkBox(
                 artworkUrl: config.defaultArtworkUrl,
+                logoAssetPath: config.logoAssetPath,
                 primaryColor: config.primaryColor,
                 accentColor: config.accentColor,
                 size: 64,

@@ -200,6 +200,7 @@ class _MiniPlayerBar extends StatelessWidget {
         children: [
           ArtworkBox(
             artworkUrl: info.artworkUrl,
+            logoAssetPath: config.logoAssetPath,
             primaryColor: config.primaryColor,
             accentColor: config.accentColor,
             size: 42,

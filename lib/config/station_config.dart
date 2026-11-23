@@ -180,6 +180,11 @@ class StationConfig {
   /// Optional hosted JSON URL for Hybrid Remote Config updates.
   final String? remoteConfigUrl;
 
+  /// Optional live website/feed URLs (RSS/Atom XML, WordPress JSON, or custom JSON).
+  final String? newsFeedUrl;
+  final String? podcastFeedUrl;
+  final String? scheduleFeedUrl;
+
   // Branding & Theme
   final Color primaryColor;
   final Color accentColor;
@@ -216,6 +221,9 @@ class StationConfig {
     this.sourceType = StreamSourceType.icy,
     this.metadataApiUrl,
     this.remoteConfigUrl,
+    this.newsFeedUrl,
+    this.podcastFeedUrl,
+    this.scheduleFeedUrl,
     required this.primaryColor,
     required this.accentColor,
     required this.logoAssetPath,
@@ -254,6 +262,9 @@ class StationConfig {
       sourceType: parsedSource,
       metadataApiUrl: json['metadataApiUrl']?.toString() ?? metadataApiUrl,
       remoteConfigUrl: remoteConfigUrl,
+      newsFeedUrl: json['newsFeedUrl']?.toString() ?? newsFeedUrl,
+      podcastFeedUrl: json['podcastFeedUrl']?.toString() ?? podcastFeedUrl,
+      scheduleFeedUrl: json['scheduleFeedUrl']?.toString() ?? scheduleFeedUrl,
       primaryColor: _parseColor(json['primaryColorHex']) ?? primaryColor,
       accentColor: _parseColor(json['accentColorHex']) ?? accentColor,
       logoAssetPath: logoAssetPath,

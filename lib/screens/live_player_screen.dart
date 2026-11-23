@@ -85,6 +85,15 @@ class _LivePlayerScreenState extends State<LivePlayerScreen> {
   Widget _buildTopBar(BuildContext context, bool isPodcast) {
     return Row(
       children: [
+        ArtworkBox(
+          artworkUrl: widget.config.defaultArtworkUrl,
+          logoAssetPath: widget.config.logoAssetPath,
+          primaryColor: widget.config.primaryColor,
+          accentColor: widget.config.accentColor,
+          size: 42,
+          radius: 12,
+        ),
+        const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,7 +102,7 @@ class _LivePlayerScreenState extends State<LivePlayerScreen> {
                 widget.config.stationName,
                 style: const TextStyle(
                   fontSize: 18,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
                   letterSpacing: -0.3,
                 ),
                 maxLines: 1,
@@ -180,6 +189,7 @@ class _LivePlayerScreenState extends State<LivePlayerScreen> {
           curve: Curves.easeOutCubic,
           child: ArtworkBox(
             artworkUrl: info.artworkUrl,
+            logoAssetPath: widget.config.logoAssetPath,
             primaryColor: widget.config.primaryColor,
             accentColor: widget.config.accentColor,
             size: artSize,

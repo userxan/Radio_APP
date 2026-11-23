@@ -156,9 +156,10 @@ class GlassCard extends StatelessWidget {
   }
 }
 
-/// Artwork display with smooth fallback to a branded gradient emblem.
+/// Artwork display with smooth fallback to local station logo asset, then gradient emblem.
 class ArtworkBox extends StatelessWidget {
   final String? artworkUrl;
+  final String? logoAssetPath;
   final Color primaryColor;
   final Color accentColor;
   final double size;
@@ -167,6 +168,7 @@ class ArtworkBox extends StatelessWidget {
   const ArtworkBox({
     super.key,
     required this.artworkUrl,
+    this.logoAssetPath,
     required this.primaryColor,
     required this.accentColor,
     required this.size,
@@ -180,9 +182,13 @@ class ArtworkBox extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.16),
+          width: 1.2,
+        ),
         boxShadow: [
           BoxShadow(
-            color: primaryColor.withValues(alpha: 0.35),
+            color: primaryColor.withValues(alpha: 0.38),
             blurRadius: 36,
             offset: const Offset(0, 16),
           ),
@@ -194,12 +200,23 @@ class ArtworkBox extends StatelessWidget {
             ? CachedNetworkImage(
                 imageUrl: artworkUrl!,
                 fit: BoxFit.cover,
-                placeholder: (_, __) => _fallback(),
-                errorWidget: (_, __, ___) => _fallback(),
+                placeholder: (_, __) => _logoOrFallback(),
+                errorWidget: (_, __, ___) => _logoOrFallback(),
               )
-            : _fallback(),
+            : _logoOrFallback(),
       ),
     );
+  }
+
+  Widget _logoOrFallback() {
+    if (logoAssetPath != null && logoAssetPath!.isNotEmpty) {
+      return Image.asset(
+        logoAssetPath!,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _fallback(),
+      );
+    }
+    return _fallback();
   }
 
   Widget _fallback() {
