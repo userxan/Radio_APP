@@ -1,0 +1,203 @@
+import 'package:flutter/material.dart';
+
+/// Supported streaming & metadata backends for the flexible adapter.
+enum StreamSourceType {
+  icy,
+  hls,
+  azuracast,
+  radioco,
+}
+
+/// Represents a scheduled radio show or DJ slot.
+class RadioShow {
+  final String id;
+  final String title;
+  final String host;
+  final String dayOfWeek; // e.g., 'Monday', 'Daily', 'Weekends'
+  final String startTime; // e.g., '08:00'
+  final String endTime;   // e.g., '11:00'
+  final String? artworkUrl;
+  final String description;
+  final bool isLiveNow;
+
+  const RadioShow({
+    required this.id,
+    required this.title,
+    required this.host,
+    required this.dayOfWeek,
+    required this.startTime,
+    required this.endTime,
+    this.artworkUrl,
+    this.description = '',
+    this.isLiveNow = false,
+  });
+
+  factory RadioShow.fromJson(Map<String, dynamic> json) {
+    return RadioShow(
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? 'Untitled Show',
+      host: json['host']?.toString() ?? '',
+      dayOfWeek: json['dayOfWeek']?.toString() ?? 'Daily',
+      startTime: json['startTime']?.toString() ?? '00:00',
+      endTime: json['endTime']?.toString() ?? '00:00',
+      artworkUrl: json['artworkUrl']?.toString(),
+      description: json['description']?.toString() ?? '',
+      isLiveNow: json['isLiveNow'] == true,
+    );
+  }
+}
+
+/// Represents an on-demand podcast or show replay episode.
+class PodcastEpisode {
+  final String id;
+  final String title;
+  final String showName;
+  final String audioUrl;
+  final String? artworkUrl;
+  final String publishedDate;
+  final Duration duration;
+  final String description;
+
+  const PodcastEpisode({
+    required this.id,
+    required this.title,
+    required this.showName,
+    required this.audioUrl,
+    this.artworkUrl,
+    required this.publishedDate,
+    required this.duration,
+    this.description = '',
+  });
+
+  factory PodcastEpisode.fromJson(Map<String, dynamic> json) {
+    return PodcastEpisode(
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? 'Untitled Episode',
+      showName: json['showName']?.toString() ?? '',
+      audioUrl: json['audioUrl']?.toString() ?? '',
+      artworkUrl: json['artworkUrl']?.toString(),
+      publishedDate: json['publishedDate']?.toString() ?? '',
+      duration: Duration(seconds: (json['durationSeconds'] as num?)?.toInt() ?? 0),
+      description: json['description']?.toString() ?? '',
+    );
+  }
+}
+
+/// Social or contact link displayed in the station info drawer/sheet.
+class SocialLink {
+  final String label;
+  final String url;
+  final String iconKey; // 'instagram', 'website', 'whatsapp', 'youtube', 'x'
+
+  const SocialLink({
+    required this.label,
+    required this.url,
+    required this.iconKey,
+  });
+
+  factory SocialLink.fromJson(Map<String, dynamic> json) {
+    return SocialLink(
+      label: json['label']?.toString() ?? '',
+      url: json['url']?.toString() ?? '',
+      iconKey: json['iconKey']?.toString() ?? 'website',
+    );
+  }
+}
+
+/// Master white-label configuration for a radio client.
+/// Local flavor defines branding, icons, and defaults;
+/// optional [remoteConfigUrl] overrides stream URLs, schedule, and podcasts live.
+class StationConfig {
+  final String clientId;
+  final String stationName;
+  final String tagline;
+  final String streamUrl;
+  final StreamSourceType sourceType;
+
+  /// Optional metadata API endpoint (e.g., AzuraCast `/api/nowplaying/1` or Radio.co status URL).
+  final String? metadataApiUrl;
+
+  /// Optional hosted JSON URL for Hybrid Remote Config updates without app store resubmission.
+  final String? remoteConfigUrl;
+
+  // Branding & Theme
+  final Color primaryColor;
+  final Color accentColor;
+  final String logoAssetPath;
+  final String? defaultArtworkUrl;
+
+  // Feature Flags (toggleable per client)
+  final bool enableSchedule;
+  final bool enablePodcasts;
+
+  // Content (can be populated locally or overridden via Remote JSON)
+  final List<RadioShow> schedule;
+  final List<PodcastEpisode> podcasts;
+  final List<SocialLink> socialLinks;
+
+  const StationConfig({
+    required this.clientId,
+    required this.stationName,
+    required this.tagline,
+    required this.streamUrl,
+    this.sourceType = StreamSourceType.icy,
+    this.metadataApiUrl,
+    this.remoteConfigUrl,
+    required this.primaryColor,
+    required this.accentColor,
+    required this.logoAssetPath,
+    this.defaultArtworkUrl,
+    this.enableSchedule = true,
+    this.enablePodcasts = true,
+    this.schedule = const [],
+    this.podcasts = const [],
+    this.socialLinks = const [],
+  });
+
+  /// Merges remote JSON overrides onto the compiled local flavor config.
+  StationConfig copyWithRemoteJson(Map<String, dynamic> json) {
+    final sourceStr = json['sourceType']?.toString().toLowerCase();
+    final parsedSource = StreamSourceType.values.firstWhere(
+      (e) => e.name == sourceStr,
+      orElse: () => sourceType,
+    );
+
+    return StationConfig(
+      clientId: clientId,
+      stationName: json['stationName']?.toString() ?? stationName,
+      tagline: json['tagline']?.toString() ?? tagline,
+      streamUrl: json['streamUrl']?.toString() ?? streamUrl,
+      sourceType: parsedSource,
+      metadataApiUrl: json['metadataApiUrl']?.toString() ?? metadataApiUrl,
+      remoteConfigUrl: remoteConfigUrl,
+      primaryColor: _parseColor(json['primaryColorHex']) ?? primaryColor,
+      accentColor: _parseColor(json['accentColorHex']) ?? accentColor,
+      logoAssetPath: logoAssetPath,
+      defaultArtworkUrl: json['defaultArtworkUrl']?.toString() ?? defaultArtworkUrl,
+      enableSchedule: json['enableSchedule'] as bool? ?? enableSchedule,
+      enablePodcasts: json['enablePodcasts'] as bool? ?? enablePodcasts,
+      schedule: (json['schedule'] as List<dynamic>?)
+              ?.map((e) => RadioShow.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          schedule,
+      podcasts: (json['podcasts'] as List<dynamic>?)
+              ?.map((e) => PodcastEpisode.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          podcasts,
+      socialLinks: (json['socialLinks'] as List<dynamic>?)
+              ?.map((e) => SocialLink.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          socialLinks,
+    );
+  }
+
+  static Color? _parseColor(dynamic hexValue) {
+    if (hexValue is! String || hexValue.isEmpty) return null;
+    final cleaned = hexValue.replaceFirst('#', '');
+    final buffer = StringBuffer();
+    if (cleaned.length == 6) buffer.write('ff');
+    buffer.write(cleaned);
+    final parsed = int.tryParse(buffer.toString(), radix: 16);
+    return parsed != null ? Color(parsed) : null;
+  }
+}

@@ -1,0 +1,38 @@
+name: radio_whitelabel
+description: Flagship white-label Flutter radio app with Dark Glassmorphic UI, hybrid remote config, and flexible stream/metadata adapters.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Audio & Background Lock-Screen Controls
+  just_audio: ^0.9.40
+  audio_service: ^0.18.15
+  audio_session: ^0.1.21
+
+  # Networking & Remote Config
+  http: ^1.2.2
+  cached_network_image: ^3.4.1
+  shared_preferences: ^2.3.2
+
+  # UI & Typography
+  google_fonts: ^6.2.1
+  palette_generator: ^0.3.3+4
+  url_launcher: ^6.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/clients/eden_fm/
+    - assets/clients/neon_pulse/
+    - assets/config/

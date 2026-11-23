@@ -1,0 +1,40 @@
+{
+  "stationName": "Eden FM 98.4",
+  "tagline": "Your Sound. Your City.",
+  "streamUrl": "https://stream.zeno.fm/0r0xa792kwzuv",
+  "sourceType": "icy",
+  "metadataApiUrl": null,
+  "primaryColorHex": "#7C3AED",
+  "accentColorHex": "#06B6D4",
+  "enableSchedule": true,
+  "enablePodcasts": true,
+  "schedule": [
+    {
+      "id": "show-1",
+      "title": "The Morning Rise",
+      "host": "DJ Maya & Leo",
+      "dayOfWeek": "Weekdays",
+      "startTime": "06:00",
+      "endTime": "10:00",
+      "isLiveNow": true
+    }
+  ],
+  "podcasts": [
+    {
+      "id": "ep-101",
+      "title": "Behind the Scenes: Summer Festival Special",
+      "showName": "The Morning Rise",
+      "audioUrl": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+      "publishedDate": "Nov 20, 2026",
+      "durationSeconds": 2520,
+      "description": "Full replay of our live backstage interviews."
+    }
+  ],
+  "socialLinks": [
+    {
+      "label": "Instagram",
+      "url": "https://instagram.com",
+      "iconKey": "instagram"
+    }
+  ]
+}

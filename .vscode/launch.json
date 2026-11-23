@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Eden FM (White-Label Client 1)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main_eden_fm.dart"
+    },
+    {
+      "name": "Neon Pulse (White-Label Client 2)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main_neon_pulse.dart"
+    }
+  ]
+}
