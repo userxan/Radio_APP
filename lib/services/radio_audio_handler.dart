@@ -66,7 +66,10 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
     // Listen to ICY metadata from Icecast/Shoutcast streams
     _icySub = _player.icyMetadataStream.listen((icy) {
       if (activeEpisode.value == null) {
-        _metadataAdapter.updateFromIcyTitle(icy?.info?.title);
+        _metadataAdapter.updateFromIcyTitle(
+          icy?.info?.title,
+          streamArtworkUrl: icy?.info?.url,
+        );
       }
     });
 

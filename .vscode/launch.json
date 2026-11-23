@@ -12,6 +12,12 @@
       "request": "launch",
       "type": "dart",
       "program": "lib/main_neon_pulse.dart"
+    },
+    {
+      "name": "My Station (Practice Copy)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main_my_station.dart"
     }
   ]
 }

@@ -68,14 +68,19 @@ class MetadataAdapter {
   }
 
   /// Parses raw ICY metadata string (typically "Artist - Song Title").
-  void updateFromIcyTitle(String? rawTitle) {
-    if (config.sourceType == StreamSourceType.azuracast ||
-        config.sourceType == StreamSourceType.radioco) {
+  void updateFromIcyTitle(String? rawTitle, {String? streamArtworkUrl}) {
+    final hasExternalApi = (config.sourceType == StreamSourceType.azuracast ||
+            config.sourceType == StreamSourceType.radioco) &&
+        config.metadataApiUrl != null &&
+        config.metadataApiUrl!.isNotEmpty;
+    if (hasExternalApi) {
       return; // External API provides richer data + artwork.
     }
     if (rawTitle == null || rawTitle.trim().isEmpty) return;
 
     final cleaned = rawTitle.trim();
+    if (cleaned == '-' || cleaned == 'Unknown') return;
+
     final separatorIndex = cleaned.indexOf(' - ');
     final String artist;
     final String title;
@@ -88,12 +93,26 @@ class MetadataAdapter {
       title = cleaned;
     }
 
+    final resolvedArtwork =
+        (streamArtworkUrl != null && _looksLikeImageUrl(streamArtworkUrl))
+            ? streamArtworkUrl
+            : config.defaultArtworkUrl;
+
     _emit(NowPlayingInfo(
       title: title.isEmpty ? config.stationName : title,
       artist: artist.isEmpty ? config.tagline : artist,
-      artworkUrl: config.defaultArtworkUrl,
+      artworkUrl: resolvedArtwork,
       isLive: true,
     ));
+  }
+
+  bool _looksLikeImageUrl(String url) {
+    final lower = url.toLowerCase();
+    return (lower.startsWith('http://') || lower.startsWith('https://')) &&
+        (lower.endsWith('.jpg') ||
+            lower.endsWith('.jpeg') ||
+            lower.endsWith('.png') ||
+            lower.endsWith('.webp'));
   }
 
   Future<void> _fetchExternalMetadata() async {

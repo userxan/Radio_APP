@@ -37,26 +37,40 @@ class _LivePlayerScreenState extends State<LivePlayerScreen> {
               return LayoutBuilder(
                 builder: (context, constraints) {
                   final compact = constraints.maxHeight < 660;
-                  final gap = compact ? 14.0 : 24.0;
-                  final bottomPad = compact ? 96.0 : 110.0;
+                  final gap = compact ? 12.0 : 20.0;
+                  final bottomPad = compact ? 92.0 : 108.0;
 
-                  return Padding(
-                    padding: EdgeInsets.fromLTRB(24, 12, 24, bottomPad),
-                    child: Column(
-                      children: [
-                        _buildTopBar(context, isPodcast),
-                        const Spacer(flex: 2),
-                        _buildArtwork(info, maxHeight: constraints.maxHeight * 0.36),
-                        const Spacer(flex: 2),
-                        _buildTrackDetails(info, isPodcast),
-                        SizedBox(height: gap),
-                        if (isPodcast) _buildPodcastScrubber() else _buildLiveBar(),
-                        SizedBox(height: gap),
-                        _buildPrimaryControls(isPodcast),
-                        SizedBox(height: gap),
-                        _buildVolumeSlider(),
-                        const Spacer(),
-                      ],
+                  return SingleChildScrollView(
+                    physics: const ClampingScrollPhysics(),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                      child: IntrinsicHeight(
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(24, 10, 24, bottomPad),
+                          child: Column(
+                            children: [
+                              _buildTopBar(context, isPodcast),
+                              const Spacer(flex: 2),
+                              _buildArtwork(
+                                info,
+                                maxHeight: constraints.maxHeight * 0.30,
+                              ),
+                              const Spacer(flex: 2),
+                              _buildTrackDetails(info, isPodcast),
+                              SizedBox(height: gap),
+                              if (isPodcast)
+                                _buildPodcastScrubber()
+                              else
+                                _buildLiveBar(),
+                              SizedBox(height: gap),
+                              _buildPrimaryControls(isPodcast),
+                              SizedBox(height: gap),
+                              _buildVolumeSlider(),
+                              const Spacer(),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   );
                 },
@@ -157,8 +171,8 @@ class _LivePlayerScreenState extends State<LivePlayerScreen> {
       builder: (context, snapshot) {
         final playing = snapshot.data?.playing ?? false;
         final width = MediaQuery.sizeOf(context).width;
-        final maxAllowed = maxHeight ?? 310.0;
-        final artSize = (width - 80).clamp(180.0, maxAllowed.clamp(180.0, 310.0));
+        final maxAllowed = maxHeight ?? 290.0;
+        final artSize = (width - 88).clamp(150.0, maxAllowed.clamp(150.0, 290.0));
 
         return AnimatedScale(
           scale: playing ? 1.0 : 0.93,
