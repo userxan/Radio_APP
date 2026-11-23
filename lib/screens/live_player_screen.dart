@@ -1,6 +1,5 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../config/station_config.dart';
 import '../services/metadata_adapter.dart';
 import '../services/radio_audio_handler.dart';
@@ -115,47 +114,39 @@ class _LivePlayerScreenState extends State<LivePlayerScreen> {
           ),
         ),
         if (isPodcast)
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: GlassCard(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          GlassCard(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            borderRadius: BorderRadius.circular(20),
+            onTap: widget.audioHandler.playLive,
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.radio_rounded, size: 15),
+                SizedBox(width: 6),
+                Text('Back to Live',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+              ],
+            ),
+          )
+        else
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: widget.config.primaryColor.withValues(alpha: 0.25),
               borderRadius: BorderRadius.circular(20),
-              onTap: widget.audioHandler.playLive,
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.radio_rounded, size: 15),
-                  SizedBox(width: 6),
-                  Text('Back to Live',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                ],
+              border: Border.all(
+                color: widget.config.primaryColor.withValues(alpha: 0.5),
+              ),
+            ),
+            child: Text(
+              widget.config.frequencyBadge,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: widget.config.accentColor,
               ),
             ),
           ),
-        ValueListenableBuilder<Duration?>(
-          valueListenable: widget.audioHandler.sleepTimerRemaining,
-          builder: (context, remaining, _) {
-            return GlassCard(
-              padding: const EdgeInsets.all(10),
-              borderRadius: BorderRadius.circular(16),
-              onTap: () => _showSleepTimerSheet(context),
-              child: Icon(
-                Icons.bedtime_rounded,
-                size: 18,
-                color: remaining != null
-                    ? widget.config.accentColor
-                    : Colors.white.withValues(alpha: 0.85),
-              ),
-            );
-          },
-        ),
-        const SizedBox(width: 8),
-        GlassCard(
-          padding: const EdgeInsets.all(10),
-          borderRadius: BorderRadius.circular(16),
-          onTap: () => _showStationInfoSheet(context),
-          child: const Icon(Icons.info_outline_rounded, size: 18),
-        ),
       ],
     );
   }
@@ -259,22 +250,6 @@ class _LivePlayerScreenState extends State<LivePlayerScreen> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-          ),
-          ValueListenableBuilder<Duration?>(
-            valueListenable: widget.audioHandler.sleepTimerRemaining,
-            builder: (context, remaining, _) {
-              if (remaining == null) return const SizedBox.shrink();
-              final mins = remaining.inMinutes.remainder(60).toString().padLeft(2, '0');
-              final secs = remaining.inSeconds.remainder(60).toString().padLeft(2, '0');
-              return Text(
-                '$mins:$secs',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: widget.config.accentColor,
-                ),
-              );
-            },
           ),
         ],
       ),
@@ -447,123 +422,6 @@ class _LivePlayerScreenState extends State<LivePlayerScreen> {
         ),
       ],
     );
-  }
-
-  void _showSleepTimerSheet(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: GlassTheme.surfaceDark,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      builder: (ctx) {
-        final options = [15, 30, 45, 60];
-        return Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Sleep Timer',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: [
-                  for (final mins in options)
-                    ActionChip(
-                      label: Text('$mins min'),
-                      onPressed: () {
-                        widget.audioHandler.setSleepTimer(Duration(minutes: mins));
-                        Navigator.pop(ctx);
-                      },
-                    ),
-                  ActionChip(
-                    label: const Text('Turn Off'),
-                    onPressed: () {
-                      widget.audioHandler.setSleepTimer(null);
-                      Navigator.pop(ctx);
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  void _showStationInfoSheet(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: GlassTheme.surfaceDark,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      builder: (ctx) {
-        return Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.config.stationName,
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                widget.config.tagline,
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
-              ),
-              if (widget.config.socialLinks.isNotEmpty) ...[
-                const SizedBox(height: 20),
-                const Text(
-                  'Connect With Us',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: widget.config.socialLinks.map((link) {
-                    return ActionChip(
-                      avatar: Icon(_iconForKey(link.iconKey), size: 16),
-                      label: Text(link.label),
-                      onPressed: () async {
-                        final uri = Uri.tryParse(link.url);
-                        if (uri != null) {
-                          await launchUrl(uri, mode: LaunchMode.externalApplication);
-                        }
-                      },
-                    );
-                  }).toList(),
-                ),
-              ],
-              const SizedBox(height: 16),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  IconData _iconForKey(String key) {
-    switch (key.toLowerCase()) {
-      case 'instagram':
-        return Icons.camera_alt_rounded;
-      case 'youtube':
-        return Icons.play_circle_fill_rounded;
-      case 'whatsapp':
-        return Icons.chat_bubble_rounded;
-      default:
-        return Icons.language_rounded;
-    }
   }
 
   String _formatDuration(Duration d) {

@@ -5,8 +5,10 @@ import '../services/metadata_adapter.dart';
 import '../services/radio_audio_handler.dart';
 import '../theme/glass_theme.dart';
 import 'live_player_screen.dart';
+import 'news_screen.dart';
 import 'podcasts_screen.dart';
 import 'schedule_screen.dart';
+import 'station_info_screen.dart';
 
 class HomeShell extends StatefulWidget {
   final StationConfig config;
@@ -36,6 +38,12 @@ class _HomeShellState extends State<HomeShell> {
           audioHandler: widget.audioHandler,
         ),
       ),
+      if (widget.config.enableNews)
+        _NavTab(
+          label: 'News',
+          icon: Icons.newspaper_rounded,
+          screen: NewsScreen(config: widget.config),
+        ),
       if (widget.config.enableSchedule)
         _NavTab(
           label: 'Schedule',
@@ -52,6 +60,11 @@ class _HomeShellState extends State<HomeShell> {
             onEpisodeSelected: () => setState(() => _currentIndex = 0),
           ),
         ),
+      _NavTab(
+        label: 'Info',
+        icon: Icons.storefront_rounded,
+        screen: StationInfoScreen(config: widget.config),
+      ),
     ];
 
     final safeIndex = _currentIndex.clamp(0, tabs.length - 1);
@@ -86,14 +99,14 @@ class _HomeShellState extends State<HomeShell> {
                 // Floating glass bottom navigation (shown if 2+ tabs are enabled)
                 if (tabs.length > 1)
                   Positioned(
-                    left: 24,
-                    right: 24,
-                    bottom: 18,
+                    left: 16,
+                    right: 16,
+                    bottom: 16,
                     child: SafeArea(
                       top: false,
                       child: GlassCard(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 8),
+                            horizontal: 8, vertical: 8),
                         borderRadius: BorderRadius.circular(28),
                         opacity: 0.11,
                         child: Row(
@@ -109,7 +122,7 @@ class _HomeShellState extends State<HomeShell> {
                                 child: AnimatedContainer(
                                   duration: const Duration(milliseconds: 220),
                                   padding:
-                                      const EdgeInsets.symmetric(vertical: 8),
+                                      const EdgeInsets.symmetric(vertical: 6),
                                   decoration: BoxDecoration(
                                     color: selected
                                         ? widget.config.primaryColor
@@ -117,22 +130,24 @@ class _HomeShellState extends State<HomeShell> {
                                         : Colors.transparent,
                                     borderRadius: BorderRadius.circular(20),
                                   ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(
                                         tab.icon,
-                                        size: 18,
+                                        size: 19,
                                         color: selected
                                             ? Colors.white
                                             : Colors.white
                                                 .withValues(alpha: 0.55),
                                       ),
-                                      const SizedBox(width: 6),
+                                      const SizedBox(height: 3),
                                       Text(
                                         tab.label,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
-                                          fontSize: 13,
+                                          fontSize: 10.5,
                                           fontWeight: selected
                                               ? FontWeight.w700
                                               : FontWeight.w500,

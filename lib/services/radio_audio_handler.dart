@@ -17,10 +17,7 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
   final ValueNotifier<NowPlayingInfo> nowPlaying = ValueNotifier(
     const NowPlayingInfo(title: 'Loading...', artist: ''),
   );
-  final ValueNotifier<Duration?> sleepTimerRemaining = ValueNotifier(null);
 
-  Timer? _sleepTimer;
-  Timer? _sleepTick;
   StreamSubscription<NowPlayingInfo>? _metaSub;
   StreamSubscription<IcyMetadata?>? _icySub;
 
@@ -203,36 +200,6 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
   Stream<Duration> get positionStream => _player.positionStream;
   Stream<Duration?> get durationStream => _player.durationStream;
 
-  /// Sets or cancels a sleep timer that pauses playback after [duration].
-  void setSleepTimer(Duration? duration) {
-    _sleepTimer?.cancel();
-    _sleepTick?.cancel();
-
-    if (duration == null) {
-      sleepTimerRemaining.value = null;
-      return;
-    }
-
-    var remaining = duration;
-    sleepTimerRemaining.value = remaining;
-
-    _sleepTick = Timer.periodic(const Duration(seconds: 1), (_) {
-      remaining -= const Duration(seconds: 1);
-      if (remaining <= Duration.zero) {
-        sleepTimerRemaining.value = null;
-        _sleepTick?.cancel();
-      } else {
-        sleepTimerRemaining.value = remaining;
-      }
-    });
-
-    _sleepTimer = Timer(duration, () {
-      pause();
-      sleepTimerRemaining.value = null;
-      _sleepTick?.cancel();
-    });
-  }
-
   void _updateMediaItem({
     required String id,
     required String title,
@@ -251,8 +218,6 @@ class RadioAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   Future<void> disposeHandler() async {
-    _sleepTimer?.cancel();
-    _sleepTick?.cancel();
     await _metaSub?.cancel();
     await _icySub?.cancel();
     _metadataAdapter.dispose();

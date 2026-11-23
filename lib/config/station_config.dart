@@ -15,7 +15,7 @@ class RadioShow {
   final String host;
   final String dayOfWeek; // e.g., 'Monday', 'Daily', 'Weekends'
   final String startTime; // e.g., '08:00'
-  final String endTime;   // e.g., '11:00'
+  final String endTime; // e.g., '11:00'
   final String? artworkUrl;
   final String description;
   final bool isLiveNow;
@@ -77,13 +77,74 @@ class PodcastEpisode {
       audioUrl: json['audioUrl']?.toString() ?? '',
       artworkUrl: json['artworkUrl']?.toString(),
       publishedDate: json['publishedDate']?.toString() ?? '',
-      duration: Duration(seconds: (json['durationSeconds'] as num?)?.toInt() ?? 0),
+      duration:
+          Duration(seconds: (json['durationSeconds'] as num?)?.toInt() ?? 0),
       description: json['description']?.toString() ?? '',
     );
   }
 }
 
-/// Social or contact link displayed in the station info drawer/sheet.
+/// Represents a news, traffic, sport, or entertainment story.
+class NewsArticle {
+  final String id;
+  final String title;
+  final String category; // e.g., 'Local', 'Music', 'Sport', 'Traffic'
+  final String summary;
+  final String body;
+  final String publishedAt;
+  final String? imageUrl;
+  final String? articleUrl;
+
+  const NewsArticle({
+    required this.id,
+    required this.title,
+    required this.category,
+    required this.summary,
+    this.body = '',
+    required this.publishedAt,
+    this.imageUrl,
+    this.articleUrl,
+  });
+
+  factory NewsArticle.fromJson(Map<String, dynamic> json) {
+    return NewsArticle(
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? 'Station Update',
+      category: json['category']?.toString() ?? 'Local',
+      summary: json['summary']?.toString() ?? '',
+      body: json['body']?.toString() ?? '',
+      publishedAt: json['publishedAt']?.toString() ?? '',
+      imageUrl: json['imageUrl']?.toString(),
+      articleUrl: json['articleUrl']?.toString(),
+    );
+  }
+}
+
+/// Highlighted competition, event, or campaign card in the Station Info hub.
+class StationPromo {
+  final String title;
+  final String subtitle;
+  final String badgeText;
+  final String? actionUrl;
+
+  const StationPromo({
+    required this.title,
+    required this.subtitle,
+    this.badgeText = 'COMPETITION',
+    this.actionUrl,
+  });
+
+  factory StationPromo.fromJson(Map<String, dynamic> json) {
+    return StationPromo(
+      title: json['title']?.toString() ?? '',
+      subtitle: json['subtitle']?.toString() ?? '',
+      badgeText: json['badgeText']?.toString() ?? 'COMPETITION',
+      actionUrl: json['actionUrl']?.toString(),
+    );
+  }
+}
+
+/// Social or contact link displayed in the Station Info hub.
 class SocialLink {
   final String label;
   final String url;
@@ -105,19 +166,18 @@ class SocialLink {
 }
 
 /// Master white-label configuration for a radio client.
-/// Local flavor defines branding, icons, and defaults;
-/// optional [remoteConfigUrl] overrides stream URLs, schedule, and podcasts live.
 class StationConfig {
   final String clientId;
   final String stationName;
   final String tagline;
+  final String frequencyBadge; // e.g., '98.4 FM' or 'DIGITAL'
   final String streamUrl;
   final StreamSourceType sourceType;
 
-  /// Optional metadata API endpoint (e.g., AzuraCast `/api/nowplaying/1` or Radio.co status URL).
+  /// Optional metadata API endpoint (e.g., AzuraCast or Radio.co status URL).
   final String? metadataApiUrl;
 
-  /// Optional hosted JSON URL for Hybrid Remote Config updates without app store resubmission.
+  /// Optional hosted JSON URL for Hybrid Remote Config updates.
   final String? remoteConfigUrl;
 
   // Branding & Theme
@@ -129,16 +189,29 @@ class StationConfig {
   // Feature Flags (toggleable per client)
   final bool enableSchedule;
   final bool enablePodcasts;
+  final bool enableNews;
+
+  // Studio & Contact Details (for the reworked Station Info hub)
+  final String aboutText;
+  final String? studioPhone;
+  final String? studioWhatsapp;
+  final String? studioSms;
+  final String? studioEmail;
+  final String? newsDeskEmail;
+  final String? studioAddress;
+  final StationPromo? promo;
 
   // Content (can be populated locally or overridden via Remote JSON)
   final List<RadioShow> schedule;
   final List<PodcastEpisode> podcasts;
+  final List<NewsArticle> news;
   final List<SocialLink> socialLinks;
 
   const StationConfig({
     required this.clientId,
     required this.stationName,
     required this.tagline,
+    this.frequencyBadge = 'LIVE FM',
     required this.streamUrl,
     this.sourceType = StreamSourceType.icy,
     this.metadataApiUrl,
@@ -149,8 +222,18 @@ class StationConfig {
     this.defaultArtworkUrl,
     this.enableSchedule = true,
     this.enablePodcasts = true,
+    this.enableNews = true,
+    this.aboutText = '',
+    this.studioPhone,
+    this.studioWhatsapp,
+    this.studioSms,
+    this.studioEmail,
+    this.newsDeskEmail,
+    this.studioAddress,
+    this.promo,
     this.schedule = const [],
     this.podcasts = const [],
+    this.news = const [],
     this.socialLinks = const [],
   });
 
@@ -166,6 +249,7 @@ class StationConfig {
       clientId: clientId,
       stationName: json['stationName']?.toString() ?? stationName,
       tagline: json['tagline']?.toString() ?? tagline,
+      frequencyBadge: json['frequencyBadge']?.toString() ?? frequencyBadge,
       streamUrl: json['streamUrl']?.toString() ?? streamUrl,
       sourceType: parsedSource,
       metadataApiUrl: json['metadataApiUrl']?.toString() ?? metadataApiUrl,
@@ -173,9 +257,21 @@ class StationConfig {
       primaryColor: _parseColor(json['primaryColorHex']) ?? primaryColor,
       accentColor: _parseColor(json['accentColorHex']) ?? accentColor,
       logoAssetPath: logoAssetPath,
-      defaultArtworkUrl: json['defaultArtworkUrl']?.toString() ?? defaultArtworkUrl,
+      defaultArtworkUrl:
+          json['defaultArtworkUrl']?.toString() ?? defaultArtworkUrl,
       enableSchedule: json['enableSchedule'] as bool? ?? enableSchedule,
       enablePodcasts: json['enablePodcasts'] as bool? ?? enablePodcasts,
+      enableNews: json['enableNews'] as bool? ?? enableNews,
+      aboutText: json['aboutText']?.toString() ?? aboutText,
+      studioPhone: json['studioPhone']?.toString() ?? studioPhone,
+      studioWhatsapp: json['studioWhatsapp']?.toString() ?? studioWhatsapp,
+      studioSms: json['studioSms']?.toString() ?? studioSms,
+      studioEmail: json['studioEmail']?.toString() ?? studioEmail,
+      newsDeskEmail: json['newsDeskEmail']?.toString() ?? newsDeskEmail,
+      studioAddress: json['studioAddress']?.toString() ?? studioAddress,
+      promo: json['promo'] is Map<String, dynamic>
+          ? StationPromo.fromJson(json['promo'] as Map<String, dynamic>)
+          : promo,
       schedule: (json['schedule'] as List<dynamic>?)
               ?.map((e) => RadioShow.fromJson(e as Map<String, dynamic>))
               .toList() ??
@@ -184,6 +280,10 @@ class StationConfig {
               ?.map((e) => PodcastEpisode.fromJson(e as Map<String, dynamic>))
               .toList() ??
           podcasts,
+      news: (json['news'] as List<dynamic>?)
+              ?.map((e) => NewsArticle.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          news,
       socialLinks: (json['socialLinks'] as List<dynamic>?)
               ?.map((e) => SocialLink.fromJson(e as Map<String, dynamic>))
               .toList() ??
