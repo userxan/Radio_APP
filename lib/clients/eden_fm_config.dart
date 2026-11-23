@@ -9,6 +9,10 @@ const edenFmConfig = StationConfig(
   frequencyBadge: '98.4 FM',
   streamUrl: 'https://stream.zeno.fm/0r0xa792kwzuv',
   sourceType: StreamSourceType.icy,
+  // Optional: paste live website feed URLs below (leave '' if unused)
+  newsFeedUrl: '',
+  podcastFeedUrl: '',
+  scheduleFeedUrl: '',
   // Optional: point to your hosted JSON to update streamUrl/schedule/news remotely
   // remoteConfigUrl: 'https://cdn.youragency.com/configs/eden_fm.json',
   primaryColor: Color(0xFF7C3AED), // Electric Violet

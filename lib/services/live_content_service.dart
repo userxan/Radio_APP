@@ -9,7 +9,7 @@ class LiveContentService {
   static const _cachePrefix = 'live_feed_';
 
   Future<List<NewsArticle>> fetchNews(StationConfig config) async {
-    final url = config.newsFeedUrl;
+    final url = config.newsFeedUrl?.trim();
     if (url == null || url.isEmpty) return config.news;
 
     final body = await _fetchWithCache('${config.clientId}_news', url);
@@ -20,7 +20,7 @@ class LiveContentService {
   }
 
   Future<List<PodcastEpisode>> fetchPodcasts(StationConfig config) async {
-    final url = config.podcastFeedUrl;
+    final url = config.podcastFeedUrl?.trim();
     if (url == null || url.isEmpty) return config.podcasts;
 
     final body = await _fetchWithCache('${config.clientId}_podcasts', url);
@@ -31,7 +31,7 @@ class LiveContentService {
   }
 
   Future<List<RadioShow>> fetchSchedule(StationConfig config) async {
-    final url = config.scheduleFeedUrl;
+    final url = config.scheduleFeedUrl?.trim();
     if (url == null || url.isEmpty) return config.schedule;
 
     final body = await _fetchWithCache('${config.clientId}_schedule', url);

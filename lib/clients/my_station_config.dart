@@ -16,6 +16,11 @@ const myStationConfig = StationConfig(
   streamUrl: 'https://stream.zeno.fm/0r0xa792kwzuv',
   sourceType: StreamSourceType.icy,
 
+  // 3b. Optional Website Feeds (leave '' if the station has no website feeds)
+  newsFeedUrl: '',
+  podcastFeedUrl: '',
+  scheduleFeedUrl: '',
+
   // 4. Brand Colors (change the hex digits after 0xFF)
   primaryColor: Color(0xFF2563EB), // Royal Blue
   accentColor: Color(0xFF10B981), // Emerald Green
