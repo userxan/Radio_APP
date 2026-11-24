@@ -12,8 +12,22 @@ class LiveContentService {
     final url = config.newsFeedUrl?.trim();
     if (url == null || url.isEmpty) return config.news;
 
-    final body = await _fetchWithCache('${config.clientId}_news', url);
+    var body = await _fetchWithCache('${config.clientId}_news', url);
     if (body == null) return config.news;
+
+    // If a regular webpage URL was pasted, auto-discover its RSS or WordPress JSON feed.
+    if (_looksLikeHtml(body)) {
+      final uri = Uri.tryParse(url);
+      final discovered = _discoverRssFromHtml(body) ??
+          (uri != null ? '${uri.origin}/wp-json/wp/v2/posts?_embed' : null);
+      if (discovered != null) {
+        final feedBody =
+            await _fetchWithCache('${config.clientId}_news_auto', discovered);
+        if (feedBody != null && !_looksLikeHtml(feedBody)) {
+          body = feedBody;
+        }
+      }
+    }
 
     final parsed = parseNewsBody(body, fallbackStation: config.stationName);
     return parsed.isNotEmpty ? parsed : config.news;
@@ -23,8 +37,21 @@ class LiveContentService {
     final url = config.podcastFeedUrl?.trim();
     if (url == null || url.isEmpty) return config.podcasts;
 
-    final body = await _fetchWithCache('${config.clientId}_podcasts', url);
+    var body = await _fetchWithCache('${config.clientId}_podcasts', url);
     if (body == null) return config.podcasts;
+
+    if (_looksLikeHtml(body)) {
+      final uri = Uri.tryParse(url);
+      final discovered = _discoverRssFromHtml(body) ??
+          (uri != null ? '${uri.origin}/feed/podcast/' : null);
+      if (discovered != null) {
+        final feedBody = await _fetchWithCache(
+            '${config.clientId}_podcasts_auto', discovered);
+        if (feedBody != null && !_looksLikeHtml(feedBody)) {
+          body = feedBody;
+        }
+      }
+    }
 
     final parsed = parsePodcastBody(body, fallbackShow: config.stationName);
     return parsed.isNotEmpty ? parsed : config.podcasts;
@@ -210,6 +237,19 @@ class LiveContentService {
     } catch (_) {
       return const [];
     }
+  }
+
+  static bool _looksLikeHtml(String body) {
+    final lower = body.trimLeft().toLowerCase();
+    return lower.startsWith('<!doctype html') || lower.startsWith('<html');
+  }
+
+  static String? _discoverRssFromHtml(String html) {
+    final reg = RegExp(
+      r'''<link[^>]+type=["']application/(?:rss|atom)\+xml["'][^>]+href=["']([^"']+)["']''',
+      caseSensitive: false,
+    );
+    return reg.firstMatch(html)?.group(1);
   }
 
   static List<String> _extractXmlBlocks(String xml, String tag) {
